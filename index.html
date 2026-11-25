@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="description" content="Schlanker Offline-Audioplayer mit Ordnern und Schlaftimer.">
+<meta name="theme-color" content="#0f0f12" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f5f2" media="(prefers-color-scheme: light)">
+<title>Klang</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" hidden>
+  <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M8 5.6v12.8a1 1 0 0 0 1.53.85l10.1-6.4a1 1 0 0 0 0-1.7L9.53 4.75A1 1 0 0 0 8 5.6z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><rect x="6" y="5" width="4" height="14" rx="1.3"/><rect x="14" y="5" width="4" height="14" rx="1.3"/></g></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><path d="M18.5 6.6v10.8a1 1 0 0 1-1.56.83L9 12.83a1 1 0 0 1 0-1.66l7.94-5.4a1 1 0 0 1 1.56.83z"/><rect x="5" y="5.5" width="2.6" height="13" rx="1.3"/></g></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><path d="M5.5 6.6v10.8a1 1 0 0 0 1.56.83L15 12.83a1 1 0 0 0 0-1.66L7.06 5.77A1 1 0 0 0 5.5 6.6z"/><rect x="16.4" y="5.5" width="2.6" height="13" rx="1.3"/></g></symbol>
+  <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
+  <symbol id="i-repeat-one" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v1a4 4 0 0 1-4 4H3M11 10h1v4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></g></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-folder-plus" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM12 10.5v5M9.5 13h5"/></symbol>
+  <symbol id="i-move" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 13h6M12.5 10.5 15 13l-2.5 2.5"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></symbol>
+  <symbol id="i-rew" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.8-6.3M3.5 3.5v4h4"/><text x="12.4" y="15.3" font-size="7.4" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none" font-family="system-ui,sans-serif">15</text></symbol>
+  <symbol id="i-fwd" viewBox="0 0 24 24"><path d="M20.5 12a8.5 8.5 0 1 1-2.8-6.3M20.5 3.5v4h-4"/><text x="11.6" y="15.3" font-size="7.4" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none" font-family="system-ui,sans-serif">30</text></symbol>
+</svg>
+
+<div class="shell">
+  <div class="app">
+    <header class="top">
+      <button id="backBtn" class="icon-btn" type="button" aria-label="Zurück" hidden><svg class="ic"><use href="#i-back"/></svg></button>
+      <h1 id="title">Klang</h1>
+      <button id="addBtn" class="icon-btn" type="button" aria-label="Hinzufügen"><svg class="ic"><use href="#i-plus"/></svg></button>
+    </header>
+
+    <main id="main">
+      <section id="libraryView" aria-label="Bibliothek">
+        <ul id="folderList" class="folder-grid"></ul>
+        <div id="emptyLib" class="empty" hidden>
+          <svg class="ic big"><use href="#i-music"/></svg>
+          <h2>Noch keine Ordner</h2>
+          <p>Lege einen Ordner an und füge Audiodateien hinzu – sie bleiben offline in der App gespeichert.</p>
+          <div class="row">
+            <button id="emptyNewBtn" class="pill primary" type="button"><svg class="ic"><use href="#i-folder-plus"/></svg>Neuer Ordner</button>
+            <button id="emptyImportBtn" class="pill" type="button"><svg class="ic"><use href="#i-upload"/></svg>Ordner importieren</button>
+          </div>
+        </div>
+        <p id="storageInfo" class="foot"></p>
+      </section>
+
+      <section id="folderView" aria-label="Ordner" hidden>
+        <div class="folder-head">
+          <span id="folderCount" class="muted"></span>
+          <button id="playAllBtn" class="pill primary" type="button"><svg class="ic"><use href="#i-play"/></svg>Abspielen</button>
+          <button id="shuffleAllBtn" class="icon-btn soft" type="button" aria-label="Zufällig abspielen"><svg class="ic"><use href="#i-shuffle"/></svg></button>
+          <button id="folderMoreBtn" class="icon-btn soft" type="button" aria-label="Ordneroptionen"><svg class="ic"><use href="#i-more"/></svg></button>
+        </div>
+        <ol id="trackList" class="tracks"></ol>
+        <div id="emptyFolder" class="empty" hidden>
+          <svg class="ic big"><use href="#i-music"/></svg>
+          <h2>Ordner ist leer</h2>
+          <p>Wähle Audiodateien von deinem Gerät aus.</p>
+          <div class="row"><button id="emptyAddBtn" class="pill primary" type="button"><svg class="ic"><use href="#i-plus"/></svg>Dateien hinzufügen</button></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer id="miniPlayer" class="mini" hidden>
+    <button id="miniOpen" class="mini-info" type="button" aria-label="Player öffnen">
+      <span id="miniArt" class="mini-art"></span>
+      <span class="mini-text"><span id="miniTitle"></span><span id="miniSub"></span></span>
+      <span id="miniTimer" class="mini-timer" hidden><svg class="ic"><use href="#i-moon"/></svg><span id="miniTimerText"></span></span>
+    </button>
+    <button id="miniPlay" class="icon-btn" type="button" aria-label="Abspielen"><svg class="ic"><use href="#i-play"/></svg></button>
+    <span class="mini-progress"><span id="miniBar"></span></span>
+  </footer>
+
+  <section id="player" class="player" aria-label="Wiedergabe">
+    <div id="playerDrag" class="player-drag">
+      <div class="player-top">
+        <button id="closePlayer" class="icon-btn" type="button" aria-label="Player schließen"><svg class="ic"><use href="#i-down"/></svg></button>
+        <span class="label">Wiedergabe</span>
+        <span class="spacer"></span>
+      </div>
+      <div class="art"><div id="art" class="art-inner"><span id="artLetter">♪</span></div></div>
+    </div>
+    <div class="meta">
+      <h2 id="pTitle">Nichts ausgewählt</h2>
+      <p id="pSub">Wähle einen Ordner und tippe auf einen Titel.</p>
+    </div>
+    <div class="seek">
+      <input id="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position">
+      <div class="times"><span id="cur">0:00</span><span id="dur">0:00</span></div>
+    </div>
+    <div class="controls">
+      <button id="shuffleBtn" class="icon-btn mode" type="button" aria-label="Zufallswiedergabe" aria-pressed="false"><svg class="ic"><use href="#i-shuffle"/></svg></button>
+      <button id="prevBtn" class="icon-btn" type="button" aria-label="Vorheriger Titel"><svg class="ic"><use href="#i-prev"/></svg></button>
+      <button id="playBtn" class="play" type="button" aria-label="Abspielen"><svg class="ic"><use href="#i-play"/></svg></button>
+      <button id="nextBtn" class="icon-btn" type="button" aria-label="Nächster Titel"><svg class="ic"><use href="#i-next"/></svg></button>
+      <button id="repeatBtn" class="icon-btn mode" type="button" aria-label="Wiederholen: aus"><svg class="ic"><use href="#i-repeat"/></svg></button>
+    </div>
+    <div class="extras">
+      <button id="rewBtn" class="extra" type="button" aria-label="15 Sekunden zurück"><svg class="ic"><use href="#i-rew"/></svg><span>Zurück</span></button>
+      <button id="speedBtn" class="extra" type="button" aria-label="Geschwindigkeit"><span id="speedVal" class="speed-val">1×</span><span>Tempo</span></button>
+      <button id="timerBtn" class="extra" type="button" aria-label="Schlaftimer"><svg class="ic"><use href="#i-moon"/></svg><span id="timerLabel">Timer</span></button>
+      <button id="fwdBtn" class="extra" type="button" aria-label="30 Sekunden vor"><svg class="ic"><use href="#i-fwd"/></svg><span>Vor</span></button>
+    </div>
+  </section>
+</div>
+
+<div id="sheet" class="sheet" hidden><div id="sheetPanel" class="sheet-panel" role="dialog" aria-modal="true"></div></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<input id="fileInput" type="file" accept="audio/*,.mp3,.m4a,.m4b,.aac,.ogg,.oga,.opus,.wav,.flac,.webm,.weba" multiple hidden>
+<input id="dirInput" type="file" webkitdirectory multiple hidden>
+<audio id="audio" preload="metadata"></audio>
+</body>
+</html>
